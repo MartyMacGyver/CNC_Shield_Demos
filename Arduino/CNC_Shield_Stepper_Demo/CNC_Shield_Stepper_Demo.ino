@@ -78,12 +78,12 @@ void loop() {
     inputString.toLowerCase();
     if (inputString == "on") {
       Serial.println("-- Enabling steppers");
-      digitalWrite(enablePin, HIGH);
+      digitalWrite(enablePin, LOW);
       steppersEnabled = true;
     }
     else if (inputString == "off") {
       Serial.println("-- Disabling steppers");
-      digitalWrite(enablePin, LOW);
+      digitalWrite(enablePin, HIGH);
       steppersEnabled = false;
     }
     stringComplete = false;
@@ -92,9 +92,9 @@ void loop() {
 
   if (steppersEnabled) {
     Serial.println("-- Executing test loop");
-    int numSteps = 128;
-    int stepDelay_L2H = 20;
-    int stepDelay_H2L = 20;
+    int numSteps = 120;
+    int stepDelay_L2H = 10;
+    int stepDelay_H2L = 10;
     int dirChangeDelay = 500;
 
     Serial.println("Direction = HIGH");
