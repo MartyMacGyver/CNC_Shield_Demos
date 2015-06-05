@@ -24,17 +24,21 @@ int stepPin, dirPin;
 int axisIdx, stepCnt;
 
 const int INPUT_BUFLEN = 200;
-String inputString = "";         // a string to hold incoming data
+String inputString = "";         // a string to hold incoming serial data
 boolean stringComplete = false;  // whether the string is complete
+boolean inputBufferTruncated = false;  // whether the string got truncated
 boolean steppersEnabled = false;
-boolean inputBufferTruncated = false;
+boolean runTest = false;
 
 void setup() {
   inputString.reserve(INPUT_BUFLEN);
+  inputString = "";
   Serial.begin(9600);
   Serial.println("Stepper exerciser for CNC Shield v3.xx");
-  Serial.println("Enter \"on\" to enable the steppers");
-  Serial.println("Enter \"off\" to disable them (once the current test cycle is complete)");
+  Serial.println("  \"r)un\" to run the tests (enables steppers)");
+  Serial.println("  \"s)top\" to stop the tests");
+  Serial.println("  \"e)nable\" to enable the steppers");
+  Serial.println("  \"d)isable\" to disable the steppers");
 
   pinMode(enablePin, OUTPUT);
   digitalWrite(enablePin, HIGH);
@@ -52,7 +56,7 @@ void setup() {
 void serialEvent() {
   while (Serial.available()) {
     char inChar = (char)Serial.read(); 
-    if (inChar == '\n') {
+    if (inChar == '\r' || inChar == '\n') {
       stringComplete = true;
     }
     else {
@@ -68,30 +72,43 @@ void serialEvent() {
 
 void loop() {
   if (stringComplete) {
-    Serial.print("-- Input received: \"");
-    Serial.print(inputString);
-    Serial.println("\"");
     if (inputBufferTruncated) {
       Serial.println("-- Note: Input was truncated!");
       inputBufferTruncated = false;
     }
     inputString.toLowerCase();
-    if (inputString == "on") {
+    if (inputString == "r" || inputString == "run") {
+      Serial.println("-- Enabling steppers");
+      digitalWrite(enablePin, LOW);
+      steppersEnabled = true;
+      Serial.println("-- Start testing");
+      runTest = true;
+    }
+    else if (inputString == "e" || inputString == "enable") {
       Serial.println("-- Enabling steppers");
       digitalWrite(enablePin, LOW);
       steppersEnabled = true;
     }
-    else if (inputString == "off") {
+    else if (inputString == "d" || inputString == "disable") {
       Serial.println("-- Disabling steppers");
       digitalWrite(enablePin, HIGH);
       steppersEnabled = false;
+    }
+    else if (inputString == "s" || inputString == "stop") {
+      Serial.println("-- Stop testing");
+      runTest = false;
+      Serial.println("-- Steppers are " + String(steppersEnabled ? "enabled" : "disabled"));
+    }
+    else {
+      Serial.println("!! InvalidInput (" + String(inputString.length()) + " chars): \"" + inputString + "\"");
     }
     stringComplete = false;
     inputString = "";
   }
 
-  if (steppersEnabled) {
+  if (runTest) {
     Serial.println("-- Executing test loop");
+    Serial.println("-- Steppers are " + String(steppersEnabled ? "enabled" : "disabled"));
     int numSteps = 120;
     int stepDelay_L2H = 10;
     int stepDelay_H2L = 10;
