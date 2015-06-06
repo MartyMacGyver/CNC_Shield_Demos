@@ -109,10 +109,10 @@ void loop() {
   if (runTest) {
     Serial.println("-- Executing test loop");
     Serial.println("-- Steppers are " + String(steppersEnabled ? "enabled" : "disabled"));
-    int numSteps = 120;
-    int stepDelay_L2H = 10;
-    int stepDelay_H2L = 10;
-    int dirChangeDelay = 500;
+    int numSteps = 800;
+    int stepDelayUs_L2H = 350; // about the lowest reliable value for my setup
+    int stepDelayUs_H2L = 350; // about the lowest reliable value for my setup
+    int dirChangeDelayMs = 250;
 
     Serial.println("Direction = HIGH");
     for(stepCnt = 0; stepCnt < numSteps; stepCnt++) {
@@ -122,15 +122,15 @@ void loop() {
         digitalWrite(dirPin, HIGH);
         digitalWrite(stepPin, HIGH);
       }
-      delay(stepDelay_H2L);
+      delayMicroseconds(stepDelayUs_H2L);
       for (axisIdx = 0; axisIdx < NUM_AXES; axisIdx++) {
         stepPin = axes[axisIdx][0];
         dirPin  = axes[axisIdx][1];
         digitalWrite(stepPin, LOW);
       }
-      delay(stepDelay_L2H);
+      delayMicroseconds(stepDelayUs_L2H);
     }
-    delay(dirChangeDelay);
+    delay(dirChangeDelayMs);
 
     Serial.println("Direction = LOW");
     for(stepCnt = 0; stepCnt < numSteps; stepCnt++) {
@@ -140,15 +140,15 @@ void loop() {
         digitalWrite(dirPin, LOW);
         digitalWrite(stepPin, HIGH);
       }
-      delay(stepDelay_H2L);
+      delayMicroseconds(stepDelayUs_H2L);
       for (axisIdx = 0; axisIdx < NUM_AXES; axisIdx++) {
         stepPin = axes[axisIdx][0];
         dirPin  = axes[axisIdx][1];
         digitalWrite(stepPin, LOW);
       }
-      delay(stepDelay_L2H);
+      delayMicroseconds(stepDelayUs_L2H);
     }
-    delay(dirChangeDelay);
+    delay(dirChangeDelayMs);
   }
 }
 
